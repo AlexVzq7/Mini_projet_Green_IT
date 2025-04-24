@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Jeu d'échecs en CSS</title>
+  <style>
+    /* Style du plateau d’échecs */
+    .board {
+      width: 480px; /* 8 cases de 60px */
+      height: 480px;
+      display: grid;
+      grid-template-columns: repeat(8, 60px);
+      grid-template-rows: repeat(8, 60px);
+      border: 2px solid #333;
+      margin: 20px auto;
+    }
+    .square {
+      width: 60px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .light {
+      background-color: #f0d9b5;
+    }
+    .dark {
+      background-color: #b58863;
+    }
+    .selected {
+      outline: 2px solid red;
+    }
+    #message {
+      text-align: center;
+      font-size: 24px;
+      margin-top: 20px;
+    }
+    button {
+      display: block;
+      margin: 20px auto;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="board" id="board"></div>
+  <div id="message"></div>
+  <button id="resetBtn">Réinitialiser la partie</button>
+
+  <script>
+    const boardElement = document.getElementById('board');
+    const messageElement = document.getElementById('message');
+    const resetBtn = document.getElementById('resetBtn');
+
+    let board = []; // Plateau représenté par un tableau 2D
+    let selectedSquare = null;
+    let currentPlayer = 'white'; // "white" pour Joueur 1, "black" pour Joueur 2
+
+    // Définition des pièces en Unicode
+    const pieces = {
+      white: {
+        king: '♔',
+        queen: '♕',
+        rook: '♖',
+        bishop: '♗',
+        knight: '♘',
+        pawn: '♙'
+      },
+      black: {
+        king: '♚',
+        queen: '♛',
+        rook: '♜',
+        bishop: '♝',
+        knight: '♞',
+        pawn: '♟'
+      }
+    };
+
+    // Initialise le plateau avec la position de départ
+    function initBoard() {
+      board = [];
+      // Créer les 8 lignes
+      for (let i = 0; i < 8; i++) {
+        board[i] = new Array(8).fill(null);
+      }
+      // Ligne 0 : pièces noires
+      board[0] = [
+        {type: 'rook', color: 'black'},
+        {type: 'knight', color: 'black'},
+        {type: 'bishop', color: 'black'},
+        {type: 'queen', color: 'black'},
+        {type: 'king', color: 'black'},
+        {type: 'bishop', color: 'black'},
+        {type: 'knight', color: 'black'},
+        {type: 'rook', color: 'black'}
+      ];
+      // Ligne 1 : pions noirs
+      board[1] = [];
+      for (let col = 0; col < 8; col++) {
+        board[1][col] = {type: 'pawn', color: 'black'};
+      }
+      // Lignes 2 à 5 : cases vides
+      for (let i = 2; i < 6; i++) {
+        board[i] = [];
+        for (let j = 0; j < 8; j++) {
+          board[i][j] = null;
+        }
+      }
+      // Ligne 6 : pions blancs
+      board[6] = [];
+      for (let col = 0; col < 8; col++) {
+        board[6][col] = {type: 'pawn', color: 'white'};
+      }
+      // Ligne 7 : pièces blanches
+      board[7] = [
+        {type: 'rook', color: 'white'},
+        {type: 'knight', color: 'white'},
+        {type: 'bishop', color: 'white'},
+        {type: 'queen', color: 'white'},
+        {type: 'king', color: 'white'},
+        {type: 'bishop', color: 'white'},
+        {type: 'knight', color: 'white'},
+        {type: 'rook', color: 'white'}
+      ];
+      currentPlayer = 'white';
+      selectedSquare = null;
+      messageElement.textContent = "Tour de Joueur 1 (Blanc)";
+      renderBoard();
+    }
+
+    // Fonction d’affichage du plateau
+    function renderBoard() {
+      boardElement.innerHTML = '';
+      for (let row = 0; row < 8; row++) {
+        for (let col = 0; col < 8; col++) {
+          const square = document.createElement('div');
+          square.classList.add('square');
+          // Définir la couleur de la case selon sa position
+          if ((row + col) % 2 === 0) {
+            square.classList.add('light');
+          } else {
+            square.classList.add('dark');
+          }
+          square.dataset.row = row;
+          square.dataset.col = col;
+          const piece = board[row][col];
+          if (piece) {
+            square.textContent = pieces[piece.color][piece.type];
+          }
+          square.addEventListener('click', handleSquareClick);
+          boardElement.appendChild(square);
+        }
+      }
+    }
+
+    // Gestion du clic sur une case
+    function handleSquareClick() {
+      const row = parseInt(this.dataset.row);
+      const col = parseInt(this.dataset.col);
+      const clickedPiece = board[row][col];
+
+      // Si aucune case n'est sélectionnée et que la case cliquée contient une pièce du joueur courant, la sélectionner
+      if (!selectedSquare) {
+        if (clickedPiece && clickedPiece.color === currentPlayer) {
+          selectedSquare = {row, col};
+          this.classList.add('selected');
+        }
+      } else {
+        // Déplacer la pièce de la case sélectionnée vers la case cliquée
+        const from = selectedSquare;
+        const piece = board[from.row][from.col];
+
+        // Vérifier si la case cible contient le roi adverse
+        if (clickedPiece && clickedPiece.type === 'king' && clickedPiece.color !== currentPlayer) {
+          board[row][col] = piece;
+          board[from.row][from.col] = null;
+          renderBoard();
+          messageElement.textContent = "Fin de partie ! Le vainqueur est " + (currentPlayer === 'white' ? "Joueur 1 (Blanc)" : "Joueur 2 (Noir)");
+          // Désactiver les clics après la fin de la partie
+          boardElement.querySelectorAll('.square').forEach(sq => {
+            sq.removeEventListener('click', handleSquareClick);
+          });
+          return;
+        }
+
+        // Effectuer le déplacement (sans vérification de la validité des mouvements)
+        board[row][col] = piece;
+        board[from.row][from.col] = null;
+        // Changer de tour
+        currentPlayer = currentPlayer === 'white' ? 'black' : 'white';
+        messageElement.textContent = "Tour de " + (currentPlayer === 'white' ? "Joueur 1 (Blanc)" : "Joueur 2 (Noir)");
+        selectedSquare = null;
+        renderBoard();
+      }
+    }
+
+    resetBtn.addEventListener('click', initBoard);
+
+    // Démarrer la partie
+    initBoard();
+  </script>
+</body>
+</html>
