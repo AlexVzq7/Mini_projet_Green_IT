@@ -1,208 +1,240 @@
 <!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8">
-  <title>Jeu d'échecs en CSS</title>
-  <style>
-    /* Style du plateau d’échecs */
-    .board {
-      width: 480px; /* 8 cases de 60px */
-      height: 480px;
-      display: grid;
-      grid-template-columns: repeat(8, 60px);
-      grid-template-rows: repeat(8, 60px);
-      border: 2px solid #333;
-      margin: 20px auto;
-    }
-    .square {
-      width: 60px;
-      height: 60px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 36px;
-      cursor: pointer;
-      transition: background-color 0.3s;
-    }
-    .light {
-      background-color: #f0d9b5;
-    }
-    .dark {
-      background-color: #b58863;
-    }
-    .selected {
-      outline: 2px solid red;
-    }
-    #message {
-      text-align: center;
-      font-size: 24px;
-      margin-top: 20px;
-    }
-    button {
-      display: block;
-      margin: 20px auto;
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-  </style>
-</head>
-<body>
-  <div class="board" id="board"></div>
-  <div id="message"></div>
-  <button id="resetBtn">Réinitialiser la partie</button>
+<html lang="en">
+   <head>
+      <meta charset="UTF-8" />
+      <title>Jeu de Dames - Impact Environnemental</title>
+      <style>
+         /* Mise en page globale */
+         body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f7f7f7;
+            color: #333;
+         }
+         header {
+            background-color: #2d6a4f;
+            color: white;
+            padding: 20px;
+            text-align: center;
+         }
+         header h1 {
+            font-size: 2.5em;
+            margin: 0;
+         }
+         header p {
+            font-size: 1.2em;
+         }
 
-  <script>
-    const boardElement = document.getElementById('board');
-    const messageElement = document.getElementById('message');
-    const resetBtn = document.getElementById('resetBtn');
+         /* Style du contenu principal */
+         .container {
+            padding: 40px;
+            max-width: 1100px;
+            margin: 0 auto;
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+         }
+         .section {
+            margin-bottom: 40px;
+         }
+         .section h2 {
+            font-size: 2em;
+            color: #2d6a4f;
+            margin-bottom: 10px;
+         }
+         .section p {
+            font-size: 1.1em;
+            line-height: 1.6;
+         }
 
-    let board = []; // Plateau représenté par un tableau 2D
-    let selectedSquare = null;
-    let currentPlayer = 'white'; // "white" pour Joueur 1, "black" pour Joueur 2
+         /* Style des avantages */
+         .advantages {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+         }
+         .advantage {
+            background-color: #e1f5d8;
+            border: 1px solid #2d6a4f;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+         }
+         .advantage h3 {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+         }
+         .advantage p {
+            font-size: 1.1em;
+         }
 
-    // Définition des pièces en Unicode
-    const pieces = {
-      white: {
-        king: '♔',
-        queen: '♕',
-        rook: '♖',
-        bishop: '♗',
-        knight: '♘',
-        pawn: '♙'
-      },
-      black: {
-        king: '♚',
-        queen: '♛',
-        rook: '♜',
-        bishop: '♝',
-        knight: '♞',
-        pawn: '♟'
-      }
-    };
+         /*Button*/
 
-    // Initialise le plateau avec la position de départ
-    function initBoard() {
-      board = [];
-      // Créer les 8 lignes
-      for (let i = 0; i < 8; i++) {
-        board[i] = new Array(8).fill(null);
-      }
-      // Ligne 0 : pièces noires
-      board[0] = [
-        {type: 'rook', color: 'black'},
-        {type: 'knight', color: 'black'},
-        {type: 'bishop', color: 'black'},
-        {type: 'queen', color: 'black'},
-        {type: 'king', color: 'black'},
-        {type: 'bishop', color: 'black'},
-        {type: 'knight', color: 'black'},
-        {type: 'rook', color: 'black'}
-      ];
-      // Ligne 1 : pions noirs
-      board[1] = [];
-      for (let col = 0; col < 8; col++) {
-        board[1][col] = {type: 'pawn', color: 'black'};
-      }
-      // Lignes 2 à 5 : cases vides
-      for (let i = 2; i < 6; i++) {
-        board[i] = [];
-        for (let j = 0; j < 8; j++) {
-          board[i][j] = null;
-        }
-      }
-      // Ligne 6 : pions blancs
-      board[6] = [];
-      for (let col = 0; col < 8; col++) {
-        board[6][col] = {type: 'pawn', color: 'white'};
-      }
-      // Ligne 7 : pièces blanches
-      board[7] = [
-        {type: 'rook', color: 'white'},
-        {type: 'knight', color: 'white'},
-        {type: 'bishop', color: 'white'},
-        {type: 'queen', color: 'white'},
-        {type: 'king', color: 'white'},
-        {type: 'bishop', color: 'white'},
-        {type: 'knight', color: 'white'},
-        {type: 'rook', color: 'white'}
-      ];
-      currentPlayer = 'white';
-      selectedSquare = null;
-      messageElement.textContent = "Tour de Joueur 1 (Blanc)";
-      renderBoard();
-    }
+         input {
+            border: 0;
+            line-height: 2.5;
+            padding: 0 20px;
+            font-size: 1rem;
+            justify-content: center;
+            text-align: center;
+            color: #fff;
+            text-shadow: 1px 1px 1px #000;
+            border-radius: 10px;
+            background-color: #2d6a4f;
+            background-image: linear-gradient(
+               to top left,
+               rgba(0, 0, 0, 0.2),
+               rgba(0, 0, 0, 0.2) 30%,
+               rgba(0, 0, 0, 0)
+            );
+            box-shadow: inset 2px 2px 3px rgba(255, 255, 255, 0.6),
+               inset -2px -2px 3px rgba(0, 0, 0, 0.6);
+         }
 
-    // Fonction d’affichage du plateau
-    function renderBoard() {
-      boardElement.innerHTML = '';
-      for (let row = 0; row < 8; row++) {
-        for (let col = 0; col < 8; col++) {
-          const square = document.createElement('div');
-          square.classList.add('square');
-          // Définir la couleur de la case selon sa position
-          if ((row + col) % 2 === 0) {
-            square.classList.add('light');
-          } else {
-            square.classList.add('dark');
-          }
-          square.dataset.row = row;
-          square.dataset.col = col;
-          const piece = board[row][col];
-          if (piece) {
-            square.textContent = pieces[piece.color][piece.type];
-          }
-          square.addEventListener('click', handleSquareClick);
-          boardElement.appendChild(square);
-        }
-      }
-    }
+         input:hover {
+            background-color: #1d4b36;
+         }
 
-    // Gestion du clic sur une case
-    function handleSquareClick() {
-      const row = parseInt(this.dataset.row);
-      const col = parseInt(this.dataset.col);
-      const clickedPiece = board[row][col];
+         input:active {
+            box-shadow: inset -2px -2px 3px rgba(255, 255, 255, 0.6),
+               inset 2px 2px 3px rgba(0, 0, 0, 0.6);
+         }
 
-      // Si aucune case n'est sélectionnée et que la case cliquée contient une pièce du joueur courant, la sélectionner
-      if (!selectedSquare) {
-        if (clickedPiece && clickedPiece.color === currentPlayer) {
-          selectedSquare = {row, col};
-          this.classList.add('selected');
-        }
-      } else {
-        // Déplacer la pièce de la case sélectionnée vers la case cliquée
-        const from = selectedSquare;
-        const piece = board[from.row][from.col];
+         /* Footer */
+         footer {
+            background-color: #2d6a4f;
+            color: white;
+            padding-bottom: 10px;
+            padding-top: 15px;
+            text-align: center;
+            margin-top: 40px;
+         }
+         footer p {
+            margin: 0;
+            font-size: 1em;
+         }
 
-        // Vérifier si la case cible contient le roi adverse
-        if (clickedPiece && clickedPiece.type === 'king' && clickedPiece.color !== currentPlayer) {
-          board[row][col] = piece;
-          board[from.row][from.col] = null;
-          renderBoard();
-          messageElement.textContent = "Fin de partie ! Le vainqueur est " + (currentPlayer === 'white' ? "Joueur 1 (Blanc)" : "Joueur 2 (Noir)");
-          // Désactiver les clics après la fin de la partie
-          boardElement.querySelectorAll('.square').forEach(sq => {
-            sq.removeEventListener('click', handleSquareClick);
-          });
-          return;
-        }
+         /* Responsive design */
+         @media (max-width: 768px) {
+            .container {
+               padding: 20px;
+            }
+         }
+      </style>
+   </head>
+   <body>
+      <!-- Header -->
+      <header>
+         <h1>Bienvenue sur le Jeu de Dames Écologique</h1>
+         <p>Un jeu divertissant avec un impact environnemental minimal</p>
+      </header>
 
-        // Effectuer le déplacement (sans vérification de la validité des mouvements)
-        board[row][col] = piece;
-        board[from.row][from.col] = null;
-        // Changer de tour
-        currentPlayer = currentPlayer === 'white' ? 'black' : 'white';
-        messageElement.textContent = "Tour de " + (currentPlayer === 'white' ? "Joueur 1 (Blanc)" : "Joueur 2 (Noir)");
-        selectedSquare = null;
-        renderBoard();
-      }
-    }
+      <!-- Main Content -->
+      <div class="container">
+         <!-- Introduction -->
+         <div class="section">
+            <h2>Pourquoi choisir notre version numérique du jeu de dames ?</h2>
+            <p>
+               Notre jeu de dames en ligne présente de nombreux avantages écologiques, permettant de
+               réduire l'empreinte carbone par rapport aux jeux physiques traditionnels. Découvrez
+               ci-dessous les raisons pour lesquelles vous pouvez jouer en toute conscience
+               écologique :
+            </p>
+         </div>
 
-    resetBtn.addEventListener('click', initBoard);
+         <!-- Advantages Section -->
+         <div class="section">
+            <h2>Les avantages écologiques de notre jeu de dames numérique</h2>
+            <div class="advantages">
+               <div class="advantage">
+                  <h3>1. Réduction des déchets physiques</h3>
+                  <p>
+                     Les jeux de société traditionnels nécessitent des matériaux comme le plastique,
+                     le carton et le papier pour fabriquer le plateau, les pions, les boîtes et les
+                     règles. En jouant à notre version numérique, vous contribuez à réduire la
+                     demande de ces matériaux et à limiter les déchets générés.
+                  </p>
+               </div>
+               <div class="advantage">
+                  <h3>2. Moins de ressources naturelles utilisées</h3>
+                  <p>
+                     La production de jeux physiques nécessite l'extraction et la transformation de
+                     ressources naturelles telles que le bois, le pétrole et le coton. En optant
+                     pour un jeu numérique, vous économisez ces ressources précieuses et réduisez la
+                     pression exercée sur notre planète.
+                  </p>
+               </div>
+               <div class="advantage">
+                  <h3>3. Aucune émission liée au transport</h3>
+                  <p>
+                     Les jeux physiques sont produits, stockés et expédiés, ce qui implique une
+                     consommation d'énergie importante et des émissions de CO2 liées au transport.
+                     Notre jeu numérique élimine complètement cette étape, contribuant ainsi à un
+                     impact environnemental réduit.
+                  </p>
+               </div>
+               <div class="advantage">
+                  <h3>4. Durabilité et conservation</h3>
+                  <p>
+                     Un jeu de dames numérique ne s'use pas avec le temps comme un jeu physique.
+                     Vous pouvez y jouer à l'infini sans avoir à vous soucier de son usure. Il n'y a
+                     donc pas de remplacement nécessaire, ce qui réduit les déchets à long terme.
+                  </p>
+               </div>
+               <div class="advantage">
+                  <h3>5. Accessibilité sans impact supplémentaire</h3>
+                  <p>
+                     Un jeu numérique ne nécessite pas de nouveaux achats de matériel physique à
+                     chaque partie. De plus, il est accessible à tous grâce aux appareils
+                     électroniques courants (ordinateurs, tablettes, téléphones), ce qui signifie
+                     que vous pouvez jouer sans avoir à vous déplacer ni à utiliser des ressources
+                     supplémentaires.
+                  </p>
+               </div>
+               <div class="advantage">
+                  <h3>6. Mesures écologiques du site</h3>
+                  <p>
+                     Un jeu très peu gourmand en requêtes entre client et serveur. L'optimisation
+                     pour accéder à la base de données permet de récupérer seulement les
+                     informations utiles et réduit le stockage en mémoire de renseignements
+                     superflus. Les connexions sont persistantes pour minimiser la consommation
+                     d'énergie lors de l'accès à la base de données. Lorsque l'utilisateur crée un
+                     compte, il est directement connecté sans devoir saisir une nouvelle fois son
+                     nom et mot de passe évitant plusieurs requêtes.
+                  </p>
+               </div>
+            </div>
+         </div>
 
-    // Démarrer la partie
-    initBoard();
-  </script>
-</body>
+         <!-- Le Saviez-vous -->
+         <div class="section">
+            <h2>Le saviez-vous ?</h2>
+            <p>
+               En moyenne, un site web produit 4.61 grammes de CO2 par page vue. Pour les sites web
+               qui ont une moyenne de 10 000 pages vues par mois, cela représente 553 kilogrammes de
+               C2 par an.
+            </p>
+         </div>
+
+         <!-- Conclusion -->
+         <div class="section">
+            <h2>Joignez-vous à nous pour un futur plus vert !</h2>
+            <p>
+               En choisissant notre jeu de dames numérique, vous faites un geste pour la planète.
+               Amusez-vous tout en participant activement à la préservation de l'environnement.
+            </p>
+         </div>
+         <input type="button" onclick="location.href='./index2.html';" value="Vers le jeu" />
+      </div>
+
+      <!-- Footer -->
+      <footer>
+         <p>
+            &copy; 2025 Jeu de Dames Écologique - Tous droits réservés<br />BRACQUEMART Théo - DOS
+            SANTOS Thomas - H'LALI Abdellah - MIR Driss - VAZQUEZ Alexandre
+         </p>
+      </footer>
+   </body>
 </html>
