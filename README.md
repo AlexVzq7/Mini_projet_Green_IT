@@ -29,7 +29,7 @@ export default {
 </template>
 ```
 
-Ou en cliquant sur le lien : [link](https://thomdoss.github.io/Lab-Work04-JS/) pour lancer le site web.
+Ou en cliquant sur le lien : [Ajouter un lien](https://www.myefrei.fr/portal/student/home) pour lancer le site web.
 
 ## Fonctionnalités
 
