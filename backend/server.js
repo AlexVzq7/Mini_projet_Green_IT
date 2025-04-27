@@ -83,36 +83,56 @@ app.post("/login", async (req, res) => {
 });
 
 // ➕ Route pour mettre à jour score et emissionCO2
-app.put("/update", async (req, res) => {
-   const { username, newScore, newEmission } = req.body; // <-- récupère newEmission aussi
-
-   try {
-      // 1. Vérifier que l'utilisateur existe
-      const user = await User.findOne({ username });
-      if (!user) {
-         return res.status(401).json({ message: "❌ Utilisateur introuvable." });
-      }
-
-      // 2. Mettre à jour les champs score et emissionCO2
-      if (newScore !== undefined) user.score += newScore;
-      if (newEmission !== undefined) user.emissionCO2 += newEmission;
-      await user.save();
-
-      res.json({
-         message: "✅ Données mises à jour avec succès.",
-         user: {
-            username: user.username,
-            score: user.score,
-            emissionCO2: user.emissionCO2, // retourne aussi emissionCO2
-         },
-      });
-      console.log(
-         `✅ Données de ${user.username} mises à jour : score = ${user.score}, CO2 = ${user.emissionCO2}`
-      );
-   } catch (err) {
-      res.status(500).json({ message: "❌ Erreur serveur", error: err.message });
+app.post('/update', async (req, res) => {
+   console.log('Arrivée sur /update, body =', req.body)
+ 
+   let { username, newScore, newEmission } = req.body
+ 
+   // 3) On force la conversion en nombre
+   newScore    = Number(newScore)
+   newEmission = Number(newEmission)
+ 
+   if (isNaN(newScore) || isNaN(newEmission)) {
+     return res.status(400).json({
+       message: '❌ newScore et newEmission doivent être des nombres valides.'
+     })
    }
-});
+ 
+   try {
+     // 4) Vérifier que l’utilisateur existe
+     const user = await User.findOne({ username })
+     if (!user) {
+       return res.status(404).json({
+         message: '❌ Utilisateur introuvable.'
+       })
+     }
+ 
+     // 5) Mettre à jour ses champs
+     user.score      += newScore
+     user.emissionCO2 += newEmission
+     await user.save()
+ 
+     console.log(
+       `✅ Données de ${username} mises à jour : score=${user.score}, CO2=${user.emissionCO2}`
+     )
+ 
+     // 6) Répondre en JSON
+     return res.json({
+       message: '✅ Données mises à jour avec succès.',
+       user: {
+         username:   user.username,
+         score:      user.score,
+         emissionCO2: user.emissionCO2
+       }
+     })
+   } catch (err) {
+     console.error('Erreur serveur:', err)
+     return res.status(500).json({
+       message: '❌ Erreur interne du serveur.',
+       error:   err.message
+     })
+   }
+ })
 
 const PORT = 3000;
 app.listen(PORT, () => console.log(`🚀 Serveur lancé sur http://localhost:${PORT}`));

@@ -12,10 +12,13 @@
          </div>
          <div class="player-name">Joueur BLANC : {{ whitePlayerName }}</div>
       </div>
+      <button @click="updateUserScore('abdellah', '920', '200')">Update</button>
    </div>
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
    name: "GameBoard",
    props: {
@@ -296,9 +299,9 @@ export default {
             const winnerName = whiteCount ? this.whitePlayerName : this.blackPlayerName;
             this.updateStatus("Fin de la partie : " + winnerName + " a gagné !");
             if (whiteCount === 0) {
-               this.updateUserScore(this.users[0].username, blackCount);
+               this.updateUserScore(this.users[0].username, blackCount, blackCount);
             } else {
-               this.updateUserScore(this.users[1].username, whiteCount);
+               this.updateUserScore(this.users[1].username, whiteCount, whiteCount);
             }
             return true;
          }
@@ -477,31 +480,27 @@ export default {
       },
 
       async updateUserScore(username, newScore, newEmission) {
-         try {
-            const response = await fetch("http://localhost:3000/update", {
-               method: "PUT",
-               headers: {
-                  "Content-Type": "application/json",
-               },
-               body: JSON.stringify({
-                  username: username,
-                  newScore: newScore,
-                  newEmission: newEmission,
-               }),
+        try {
+            // Remplace l’URL si besoin, par ex. '/update' si tu as configuré un proxy en dev
+            const response = await axios.post('http://localhost:3000/update', {
+                username,
+                newScore,
+                newEmission
             });
 
-            const data = await response.json();
-            console.log(data, type(data));
-            if (response.ok) {
-               console.log("✅ Score et émission CO2 mis à jour:", data.user);
+            // axios jette en erreur si status != 2xx, donc ici on est en 2xx
+            console.log('✅ Score et émission CO2 mis à jour :', response.data.user);
+        } catch (err) {
+            // err.response existe si le serveur a renvoyé un payload (4xx/5xx)
+            if (err.response) {
+            console.error(`❌ Erreur ${err.response.status} :`, err.response.data.message || err.response.data);
             } else {
-               console.error("❌ Erreur mise à jour:", data.message);
+            // sinon c’est une erreur réseau / timeout / CORS…
+            console.error('❌ Erreur réseau ou autre :', err.message);
             }
-         } catch (error) {
-            console.error("❌ Erreur réseau:", error.message);
-         }
-      },
-   },
+        }
+        },
+    },
    mounted() {
       this.initBoard();
       this.renderBoard();

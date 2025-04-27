@@ -17,7 +17,7 @@
       <div v-else>
          <h2 class="title text-green-700">Connecté : {{ user.username }}</h2>
          <p><strong>Score :</strong> {{ user.score }}</p>
-         <p><strong>Émission CO2 :</strong> {{ user.emissionCO2 }} kg</p>
+         <p><strong>Émission CO2 :</strong> {{ user.emissionCO2 }} g</p>
          <button @click="logout()" class="btn btn-gray">Se déconnecter</button>
       </div>
    </div>
