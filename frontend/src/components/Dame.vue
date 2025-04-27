@@ -1,23 +1,29 @@
 <template>
-  <div class="game-container">
-    <h1>Jeu de Dames</h1>
-    <div id="status">{{ status }}</div>
-    <div id="board-container" ref="boardContainer">
-      <table id="board">
-        <tr v-for="(row, r) in SIZE" :key="r">
-          <td v-for="(col, c) in SIZE" :key="c"
-              :class="getCellClass(SIZE - 1 - r, c)"
-              :data-r="SIZE - 1 - r" :data-c="c"
-              @click="onCellClick(SIZE - 1 - r, c)">
-            <div v-if="board[SIZE - 1 - r][c] !== 0"
-                 :class="getPieceClass(board[SIZE - 1 - r][c])">
-              {{ getPieceSymbol(board[SIZE - 1 - r][c]) }}
-            </div>
-          </td>
-        </tr>
-      </table>
-    </div>
-  </div>
+   <div class="game-container">
+      <h1>Jeu de Dames</h1>
+      <div id="status">{{ status }}</div>
+      <div id="board-container" ref="boardContainer">
+         <table id="board">
+            <tr v-for="(row, r) in SIZE" :key="r">
+               <td
+                  v-for="(col, c) in SIZE"
+                  :key="c"
+                  :class="getCellClass(SIZE - 1 - r, c)"
+                  :data-r="SIZE - 1 - r"
+                  :data-c="c"
+                  @click="onCellClick(SIZE - 1 - r, c)"
+               >
+                  <div
+                     v-if="board[SIZE - 1 - r][c] !== 0"
+                     :class="getPieceClass(board[SIZE - 1 - r][c])"
+                  >
+                     {{ getPieceSymbol(board[SIZE - 1 - r][c]) }}
+                  </div>
+               </td>
+            </tr>
+         </table>
+      </div>
+   </div>
 </template>
 
 <script>
@@ -128,43 +134,57 @@ export default {
     isHighlighted(r, c) {
       return this.highlighted.some(cell => cell.r === r && cell.c === c);
     },
+
     highlightCell(r, c) {
       this.highlighted.push({ r, c });
     },
+
     clearHighlights() {
       this.highlighted = [];
     },
+
     checkGameOver() {
-      let white = 0, black = 0;
-      for (let row of this.board) {
-        for (let cell of row) {
-          if (cell > 0) white++;
-          if (cell < 0) black++;
-        }
-      }
-      if (white === 0 || black === 0) {
-        this.gameEnded = true;
-        this.status = `Fin de la partie : ${white === 0 ? 'NOIRS' : 'BLANCS'} ont gagné !`;
-        return true;
-      }
-      let hasMove = false;
-      for (let r = 0; r < this.SIZE; r++) {
-        for (let c = 0; c < this.SIZE; c++) {
-          if (this.board[r][c] * this.currentPlayer > 0) {
-            if (this.getMovesForPiece(r, c).length > 0) {
-              hasMove = true;
-              break;
+         let white = 0,
+            black = 0;
+         for (let row of this.board) {
+            for (let cell of row) {
+               if (cell > 0) white++;
+               if (cell < 0) black++;
             }
-          }
-        }
-      }
-      if (!hasMove) {
-        this.gameEnded = true;
-        this.status = `Fin de la partie : ${this.currentPlayer === 1 ? 'NOIRS' : 'BLANCS'} ont gagné !`;
-        return true;
-      }
-      return false;
-    },
+         }
+         if (white === 0 || black === 0) {
+            this.gameEnded = true;
+            this.status = `Fin de la partie : ${white === 0 ? 'NOIRS' : 'BLANCS'} ont dadadagagné !`;
+            if (white === 0) {
+              console.log("ca marche")
+              this.updateUserScore(this.user2.username, black);
+            } else {
+              console.log("ca marche2")
+              this.updateUserScore(this.user1.username, white);
+            }
+            return true;
+         }
+         let hasMove = false;
+         for (let r = 0; r < this.SIZE; r++) {
+            for (let c = 0; c < this.SIZE; c++) {
+               if (this.board[r][c] * this.currentPlayer > 0) {
+                  if (this.getMovesForPiece(r, c).length > 0) {
+                     hasMove = true;
+                     break;
+                  }
+               }
+            }
+         }
+         if (!hasMove) {
+            this.gameEnded = true;
+            this.status = `Fin de la partie : ${
+               this.currentPlayer === 1 ? 'NOIRS' : 'BLANCS'
+            } ont blblblgagné !`;
+            return true;
+         }
+         return false;
+      },
+
     getAllForcedMoves(player) {
       let moves = [];
       for (let r = 0; r < this.SIZE; r++) {
@@ -332,68 +352,95 @@ export default {
     }
   }
 }
+
+async updateUserScore(username, newScore) {
+         try {
+            const response = await fetch('http://localhost:3000/update', {
+               // adapte l'URL si besoin
+               method: 'PUT',
+               headers: {
+                  'Content-Type': 'application/json',
+               },
+               console.log("update de score")
+               body: JSON.stringify({
+                  username: username,
+                  newScore: newScore,
+               }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+               console.log('✅ Score mis à jour:', data.user);
+            } else {
+               console.error('❌ Erreur mise à jour:', data.message);
+            }
+         } catch (error) {
+            console.error('❌ Erreur réseau:', error.message);
+         }
+      },
 </script>
 
 <style scoped>
 body {
-  font-family: sans-serif;
-  text-align: center;
-  width: 100%;
-  border: 1px solid red;
+   font-family: sans-serif;
+   text-align: center;
+   width: 100%;
+   border: 1px solid red;
 }
 /* Conteneur pour permettre le positionnement absolu du pion animé */
 #board-container {
-  position: relative;
-  display: inline-block;
+   position: relative;
+   display: inline-block;
 }
 #board {
-  margin: 20px auto;
-  border-collapse: collapse;
-  border-radius: 20px;
-  overflow: hidden;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.469);
+   margin: 20px auto;
+   border-collapse: collapse;
+   border-radius: 20px;
+   overflow: hidden;
+   box-shadow: 0 5px 20px rgba(0, 0, 0, 0.469);
 }
 #board td {
-  width: 60px;
-  height: 60px;
-  text-align: center;
-  vertical-align: middle;
-  font-size: 36px;
-  cursor: pointer;
-  position: relative;
+   width: 60px;
+   height: 60px;
+   text-align: center;
+   vertical-align: middle;
+   font-size: 36px;
+   cursor: pointer;
+   position: relative;
 }
 .light {
-  background-color: #eee;
+   background-color: #eee;
 }
 .dark {
-  background-color: #555;
-  color: white;
+   background-color: #555;
+   color: white;
 }
 .piece {
-  display: inline-block;
-  width: 80%;
-  height: 80%;
-  border-radius: 50%;
-  line-height: 60px;
-  text-align: center;
-  font-weight: bold;
+   display: inline-block;
+   width: 80%;
+   height: 80%;
+   border-radius: 50%;
+   line-height: 60px;
+   text-align: center;
+   font-weight: bold;
 }
 .white-piece {
-  background-color: #fff;
-  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.724);
+   background-color: #fff;
+   box-shadow: 0 5px 10px rgba(0, 0, 0, 0.724);
 }
 .black-piece {
-  background-color: #000;
-  color: #000;
-  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.724);
+   background-color: #000;
+   color: #000;
+   box-shadow: 0 5px 10px rgba(0, 0, 0, 0.724);
 }
 .dame {
-  box-shadow: 0 0 0 3px gold inset;
+   box-shadow: 0 0 0 3px gold inset;
 }
 .selected {
-  outline: 3px solid yellow;
+   outline: 3px solid yellow;
 }
 .highlight {
-  background-color: #88cc88 !important;
+   background-color: #88cc88 !important;
 }
 </style>

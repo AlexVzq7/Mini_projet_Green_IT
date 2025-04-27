@@ -16,34 +16,38 @@ mongoose
    .then(() => console.log("✅ Connecté à MongoDB"))
    .catch((err) => console.error("❌ Erreur MongoDB:", err));
 
-// ➕ Route pour créer un utilisateur
-app.post("/register", async (req, res) => {
-   const { username, password } = req.body;
+// ➕ Route pour mettre à jour score et émission CO2
+app.put("/update", async (req, res) => {
+   const { username, newScore, newEmission } = req.body;
+
    try {
-      if (!username || !password) {
-         return res.status(400).json({ message: "Nom d'utilisateur et mot de passe requis." });
+      // Cherche l'utilisateur dans la base de données
+      const user = await User.findOne({ username });
+      if (!user) {
+         return res.status(404).json({ message: "Utilisateur introuvable." });
       }
 
-      // Vérifie si le nom d'utilisateur existe déjà
-      const existingUser = await User.findOne({ username });
-      if (existingUser) {
-         return res.status(409).json({ message: "Nom d'utilisateur déjà pris." });
+      // Met à jour les champs si fournis
+      if (typeof newScore === "number") {
+         user.score += newScore;
       }
 
-      const newUser = new User({ username, password });
-      await newUser.save();
+      if (typeof newEmission === "number") {
+         user.emissionCO2 += newEmission;
+      }
 
-      res.status(201).json({
-         message: "✅ Utilisateur créé avec succès.",
+      await user.save();
+
+      res.json({
+         message: "✅ Données mises à jour avec succès.",
          user: {
-            username: newUser.username,
-            score: newUser.score,
-            emissionCO2: newUser.emissionCO2,
+            username: user.username,
+            score: user.score,
+            emissionCO2: user.emissionCO2,
          },
       });
-      console.log("✅ Utilisateur créé avec succès.");
-   } catch (err) {
-      res.status(500).json({ message: "❌ Erreur serveur", error: err.message });
+   } catch (error) {
+      res.status(500).json({ message: "Erreur serveur", error: error.message });
    }
 });
 
@@ -73,6 +77,38 @@ app.post("/login", async (req, res) => {
          },
       });
       console.log(`L'utilisateur ${user.username} s'est connecté avec succès. `);
+   } catch (err) {
+      res.status(500).json({ message: "❌ Erreur serveur", error: err.message });
+   }
+});
+
+// ➕ Route pour mettre à jour score et emissionCO2
+app.put("/update", async (req, res) => {
+   const { username, newScore, newEmission } = req.body; // <-- récupère newEmission aussi
+
+   try {
+      // 1. Vérifier que l'utilisateur existe
+      const user = await User.findOne({ username });
+      if (!user) {
+         return res.status(401).json({ message: "❌ Utilisateur introuvable." });
+      }
+
+      // 2. Mettre à jour les champs score et emissionCO2
+      if (newScore !== undefined) user.score += newScore;
+      if (newEmission !== undefined) user.emissionCO2 += newEmission;
+      await user.save();
+
+      res.json({
+         message: "✅ Données mises à jour avec succès.",
+         user: {
+            username: user.username,
+            score: user.score,
+            emissionCO2: user.emissionCO2, // retourne aussi emissionCO2
+         },
+      });
+      console.log(
+         `✅ Données de ${user.username} mises à jour : score = ${user.score}, CO2 = ${user.emissionCO2}`
+      );
    } catch (err) {
       res.status(500).json({ message: "❌ Erreur serveur", error: err.message });
    }
