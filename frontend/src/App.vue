@@ -8,7 +8,10 @@
          @update-user="updateUser2"
          class="component-right"
       />
+      
+
    </div>
+   <accueil/>
 </template>
 
 <script setup>
@@ -16,6 +19,7 @@
 import { ref } from "vue";
 import UserLoginCard from "./components/UserLoginCard.vue";
 import GameBoard from "./components/GameBoard.vue";
+import accueil from "./components/accueil.vue"
 
 const user1 = ref({ username: "..." });
 const user2 = ref({ username: "..." });

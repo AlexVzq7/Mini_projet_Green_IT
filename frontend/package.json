@@ -10,10 +10,16 @@
   },
   "dependencies": {
     "axios": "^1.9.0",
-    "vue": "^3.5.13"
+    "vue": "^3.5.13",
+    "vue-router": "^4.5.1"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^5.2.1",
+    "@vitejs/plugin-vue": "^5.2.3",
     "vite": "^6.3.3"
-  }
+  },
+  "description": "Ce projet permet de jouer au **jeu de dames** sur un plateau de 10x10.\r Il gère :",
+  "main": "vite.config.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }

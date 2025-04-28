@@ -1,0 +1,12 @@
+{
+  "name": "mini_projet_green_it",
+  "version": "1.0.0",
+  "description": "Ce projet permet de jouer au **jeu de dames** sur un plateau de 10x10.\r Il gère :",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

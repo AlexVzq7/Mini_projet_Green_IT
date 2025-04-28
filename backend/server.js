@@ -16,6 +16,36 @@ mongoose
    .then(() => console.log("✅ Connecté à MongoDB"))
    .catch((err) => console.error("❌ Erreur MongoDB:", err));
 
+app.post("/register", async (req, res) => {
+   const { username, password } = req.body;
+   try {
+      if (!username || !password) {
+         return res.status(400).json({ message: "Nom d'utilisateur et mot de passe requis." });
+      }
+
+      // Vérifie si le nom d'utilisateur existe déjà
+      const existingUser = await User.findOne({ username });
+      if (existingUser) {
+         return res.status(409).json({ message: "Nom d'utilisateur déjà pris." });
+      }
+
+      const newUser = new User({ username, password });
+      await newUser.save();
+
+      res.status(201).json({
+         message: "✅ Utilisateur créé avec succès.",
+         user: {
+            username: newUser.username,
+            score: newUser.score,
+            emissionCO2: newUser.emissionCO2,
+         },
+      });
+      console.log("✅ Utilisateur créé avec succès.");
+   } catch (err) {
+      res.status(500).json({ message: "❌ Erreur serveur", error: err.message });
+   }
+});
+   
 // ➕ Route pour mettre à jour score et émission CO2
 app.put("/update", async (req, res) => {
    const { username, newScore, newEmission } = req.body;

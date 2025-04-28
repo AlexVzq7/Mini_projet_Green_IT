@@ -25,6 +25,8 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
+import axios from "axios";
+
 
 const props = defineProps({
    userId: Number,
@@ -33,12 +35,13 @@ const props = defineProps({
 
 const emit = defineEmits(["update-user"]);
 
-const username = ref("");
-const password = ref("");
-const error = ref("");
+const username = ref('');
+const password = ref('');
+const error = ref('');
 
 const login = async () => {
    error.value = "";
+   updateUserData(username.value,'0','0.0000183');
    try {
       const res = await fetch("http://localhost:3000/login", {
          method: "POST",
@@ -57,11 +60,13 @@ const login = async () => {
 const register = async () => {
    error.value = "";
    try {
+      console.log("Step 1");
       const res = await fetch("http://localhost:3000/register", {
          method: "POST",
          headers: { "Content-Type": "application/json" },
          body: JSON.stringify({ username: username.value, password: password.value }),
       });
+      console.log("Step 2");
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
       localStorage.setItem(`user_${props.userId}`, JSON.stringify(data.user));
@@ -84,6 +89,28 @@ onMounted(() => {
       emit("update-user", JSON.parse(savedUser));
    }
 });
+
+const updateUserData = async (username, newScore, newEmission) => {
+        try {
+            // Remplace l’URL si besoin, par ex. '/update' si tu as configuré un proxy en dev
+            const response = await axios.post('http://localhost:3000/update', {
+                username,
+                newScore,
+                newEmission
+            });
+
+            // axios jette en erreur si status != 2xx, donc ici on est en 2xx
+            console.log('✅ Score et émission CO2 mis à jour :', response.data.user);
+        } catch (err) {
+            // err.response existe si le serveur a renvoyé un payload (4xx/5xx)
+            if (err.response) {
+            console.error(`❌ Erreur ${err.response.status} :`, err.response.data.message || err.response.data);
+            } else {
+            // sinon c’est une erreur réseau / timeout / CORS…
+            console.error('❌ Erreur réseau ou autre :', err.message);
+            }
+        }
+        }
 </script>
 
 <style scoped>

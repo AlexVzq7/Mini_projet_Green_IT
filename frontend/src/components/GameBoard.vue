@@ -12,7 +12,7 @@
          </div>
          <div class="player-name">Joueur BLANC : {{ whitePlayerName }}</div>
       </div>
-      <button @click="updateUserScore('abdellah', '920', '200')">Update</button>
+      <button @click="updateUserData('abdellah', '920', '200')">Update</button>
    </div>
 </template>
 
@@ -36,14 +36,26 @@ export default {
          selected: null,
          forcedMoves: null,
          gameEnded: false,
+         usersLocal:[...this.users]
       };
    },
+
+   watch:{
+      users:{
+         handler(newUsers){
+            this.usersLocal =[...newUsers];
+         },
+         deep: true,
+         immediate:true
+      }
+   },
+
    computed: {
       blackPlayerName() {
-         return this.users[0].username;
+         return this.usersLocal[0].username;
       },
       whitePlayerName() {
-         return this.users[1].username;
+         return this.usersLocal[1].username;
       },
    },
    methods: {
@@ -299,9 +311,9 @@ export default {
             const winnerName = whiteCount ? this.whitePlayerName : this.blackPlayerName;
             this.updateStatus("Fin de la partie : " + winnerName + " a gagné !");
             if (whiteCount === 0) {
-               this.updateUserScore(this.users[0].username, blackCount, blackCount);
+               this.updateUserData(this.users[0].username, blackCount, blackCount);
             } else {
-               this.updateUserScore(this.users[1].username, whiteCount, whiteCount);
+               this.updateUserData(this.users[1].username, whiteCount, whiteCount);
             }
             return true;
          }
@@ -479,7 +491,7 @@ export default {
          document.getElementById("status").textContent = msg;
       },
 
-      async updateUserScore(username, newScore, newEmission) {
+      async updateUserData(username, newScore, newEmission) {
         try {
             // Remplace l’URL si besoin, par ex. '/update' si tu as configuré un proxy en dev
             const response = await axios.post('http://localhost:3000/update', {
@@ -487,7 +499,11 @@ export default {
                 newScore,
                 newEmission
             });
-
+            this.usersLocal = this.usersLocal.map(u=>
+               u.username === response.data.user.username
+                  ? response.data.user
+                  : u
+            );
             // axios jette en erreur si status != 2xx, donc ici on est en 2xx
             console.log('✅ Score et émission CO2 mis à jour :', response.data.user);
         } catch (err) {
@@ -500,6 +516,7 @@ export default {
             }
         }
         },
+   
     },
    mounted() {
       this.initBoard();
