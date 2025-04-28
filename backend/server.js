@@ -38,6 +38,7 @@ app.post("/register", async (req, res) => {
             username: newUser.username,
             score: newUser.score,
             emissionCO2: newUser.emissionCO2,
+            image: newUser.image,
          },
       });
       console.log("✅ Utilisateur créé avec succès.");
@@ -104,6 +105,7 @@ app.post("/login", async (req, res) => {
             username: user.username,
             score: user.score,
             emissionCO2: user.emissionCO2,
+            image: user.image,
          },
       });
       console.log(`L'utilisateur ${user.username} s'est connecté avec succès. `);

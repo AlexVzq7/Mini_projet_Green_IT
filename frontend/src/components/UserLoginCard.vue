@@ -2,6 +2,11 @@
    <div class="user-login-card">
       <div v-if="!user || user.username === '...'">
          <h2 class="title">Utilisateur {{ userId }}</h2>
+         <div>
+            <button @click="previousImage">⬅️</button>
+            <img :src="currentAvatar" alt="Avatar" class="avatar-img" />
+            <button @click="nextImage">➡️</button>
+         </div>
 
          <input v-model="username" placeholder="Nom d'utilisateur" class="input" />
          <input v-model="password" type="password" placeholder="Mot de passe" class="input" />
@@ -16,17 +21,17 @@
 
       <div v-else>
          <h2 class="title text-green-700">Connecté : {{ user.username }}</h2>
+         <img v-if="userAvatar" :src="userAvatar" alt="Avatar utilisateur" class="avatar-img" />
          <p><strong>Score :</strong> {{ user.score }}</p>
-         <p><strong>Émission CO2 :</strong> {{ user.emissionCO2 }} g</p>
+         <p><strong>Émission CO2 :</strong> {{ user.emissionCO2 }} kg</p>
          <button @click="logout()" class="btn btn-gray">Se déconnecter</button>
       </div>
    </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
 import axios from "axios";
-
+import { ref, computed,onMounted } from "vue";
 
 const props = defineProps({
    userId: Number,
@@ -35,13 +40,43 @@ const props = defineProps({
 
 const emit = defineEmits(["update-user"]);
 
-const username = ref('');
-const password = ref('');
-const error = ref('');
+// — Pré-import de tous vos avatars
+import avatar1 from '../assets/img1.png';
+import avatar2 from '../assets/img2.png';
+import avatar3 from '../assets/img3.png';
+const avatars = [avatar1, avatar2, avatar3];
+
+// — Avant login : index & avatar courant
+const index = ref(0);
+const currentAvatar = computed(() => avatars[index.value]);
+
+// — Mapping filename → module importé
+const avatarMap = {
+   'img1.png': avatar1,
+   'img2.png': avatar2,
+   'img3.png': avatar3,
+};
+
+// — Après login : avatar de l’utilisateur
+const userAvatar = computed(() => {
+   const img = props.user && props.user.image;
+   return img ? avatarMap[img] : '';
+});
+
+// — Navigation des avatars avant login
+function nextImage() {
+   index.value = (index.value + 1) % avatars.length;
+}
+function previousImage() {
+   index.value = (index.value - 1 + avatars.length) % avatars.length;
+}
+
+const username = ref("");
+const password = ref("");
+const error = ref("");
 
 const login = async () => {
    error.value = "";
-   updateUserData(username.value,'0','0.0000183');
    try {
       const res = await fetch("http://localhost:3000/login", {
          method: "POST",
@@ -50,6 +85,13 @@ const login = async () => {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
+
+      // 1. Met à jour la base
+      await updateUserData(data.user.username, 0, 0.0000183);
+
+      // 2. Met aussi à jour le front manuellement
+      data.user.emissionCO2 += 0.0000183;
+
       localStorage.setItem(`user_${props.userId}`, JSON.stringify(data.user));
       emit("update-user", data.user);
    } catch (err) {
@@ -57,19 +99,48 @@ const login = async () => {
    }
 };
 
+const updateUserData = async (username, newScore, newEmission) => {
+   try {
+      const response = await axios.put("http://localhost:3000/update", {
+         username,
+         newScore,
+         newEmission,
+      });
+      console.log("✅ Score et émission CO2 mis à jour :", response.data.user);
+   } catch (err) {
+      if (err.response) {
+         console.error(
+            `❌ Erreur ${err.response.status} :`,
+            err.response.data.message || err.response.data
+         );
+      } else {
+         console.error("❌ Erreur réseau ou autre :", err.message);
+      }
+   }
+};
+
 const register = async () => {
    error.value = "";
    try {
-      console.log("Step 1");
-      const res = await fetch("http://localhost:3000/register", {
-         method: "POST",
-         headers: { "Content-Type": "application/json" },
-         body: JSON.stringify({ username: username.value, password: password.value }),
+            // Choix de l’avatar courant
+            const selectedFilename = `img${index.value + 1}.png`;
+      console.log(selectedFilename);
+      const res = await fetch('http://localhost:3000/register', {
+         method: 'POST',
+         headers: { 'Content-Type': 'application/json' },
+         body: JSON.stringify({
+            username: username.value,
+            password: password.value,
+            image: selectedFilename,
+         }),
       });
-      console.log("Step 2");
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
       localStorage.setItem(`user_${props.userId}`, JSON.stringify(data.user));
+      await updateUserData(data.user.username, 0, 0.0000172);
+
+      // 2. Met aussi à jour le front manuellement
+      data.user.emissionCO2 += 0.0000172;
       emit("update-user", data.user);
    } catch (err) {
       error.value = err.message;
@@ -89,28 +160,6 @@ onMounted(() => {
       emit("update-user", JSON.parse(savedUser));
    }
 });
-
-const updateUserData = async (username, newScore, newEmission) => {
-        try {
-            // Remplace l’URL si besoin, par ex. '/update' si tu as configuré un proxy en dev
-            const response = await axios.post('http://localhost:3000/update', {
-                username,
-                newScore,
-                newEmission
-            });
-
-            // axios jette en erreur si status != 2xx, donc ici on est en 2xx
-            console.log('✅ Score et émission CO2 mis à jour :', response.data.user);
-        } catch (err) {
-            // err.response existe si le serveur a renvoyé un payload (4xx/5xx)
-            if (err.response) {
-            console.error(`❌ Erreur ${err.response.status} :`, err.response.data.message || err.response.data);
-            } else {
-            // sinon c’est une erreur réseau / timeout / CORS…
-            console.error('❌ Erreur réseau ou autre :', err.message);
-            }
-        }
-        }
 </script>
 
 <style scoped>
@@ -190,5 +239,17 @@ const updateUserData = async (username, newScore, newEmission) => {
    margin-top: 10px;
    font-size: 0.9rem;
    text-align: center;
+}
+#button_avatar {
+   margin: 20px;
+   padding: 10px 20px;
+   font-size: 16px;
+}
+
+img {
+   width: 200px;
+   height: 200px;
+   object-fit: cover;
+   border-radius: 50%;
 }
 </style>

@@ -100,12 +100,6 @@
             Amusez-vous tout en participant activement à la préservation de l'environnement.
           </p>
         </div>
-        <!-- Utilise un router-link si tu utilises Vue Router, sinon adapte selon ton système de navigation -->
-        <input
-          type="button"
-          value="Vers le jeu"
-          @click="$emit('go-to-game')"
-        />
       </div>
   
       <!-- Footer -->

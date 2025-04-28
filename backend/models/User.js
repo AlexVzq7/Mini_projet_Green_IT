@@ -6,6 +6,7 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
   score: { type: Number, default: 0 },
   emissionCO2: { type: Number, default: 0},
+  image: { type: String, default: 'img1.png' },
 });
 
 userSchema.pre('save', async function(next) {

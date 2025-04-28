@@ -12,13 +12,10 @@
          </div>
          <div class="player-name">Joueur BLANC : {{ whitePlayerName }}</div>
       </div>
-      <button @click="updateUserData('abdellah', '920', '200')">Update</button>
    </div>
 </template>
 
 <script>
-import axios from 'axios';
-
 export default {
    name: "GameBoard",
    props: {
@@ -36,26 +33,14 @@ export default {
          selected: null,
          forcedMoves: null,
          gameEnded: false,
-         usersLocal:[...this.users]
       };
    },
-
-   watch:{
-      users:{
-         handler(newUsers){
-            this.usersLocal =[...newUsers];
-         },
-         deep: true,
-         immediate:true
-      }
-   },
-
    computed: {
       blackPlayerName() {
-         return this.usersLocal[0].username;
+         return this.users[0].username;
       },
       whitePlayerName() {
-         return this.usersLocal[1].username;
+         return this.users[1].username;
       },
    },
    methods: {
@@ -311,9 +296,9 @@ export default {
             const winnerName = whiteCount ? this.whitePlayerName : this.blackPlayerName;
             this.updateStatus("Fin de la partie : " + winnerName + " a gagné !");
             if (whiteCount === 0) {
-               this.updateUserData(this.users[0].username, blackCount, blackCount);
+               this.updateUserAfterGame(this.users[0].username, 1, blackCount);
             } else {
-               this.updateUserData(this.users[1].username, whiteCount, whiteCount);
+               this.updateUserAfterGame(this.users[1].username, 2, whiteCount);
             }
             return true;
          }
@@ -491,33 +476,30 @@ export default {
          document.getElementById("status").textContent = msg;
       },
 
-      async updateUserData(username, newScore, newEmission) {
-        try {
-            // Remplace l’URL si besoin, par ex. '/update' si tu as configuré un proxy en dev
-            const response = await axios.post('http://localhost:3000/update', {
-                username,
-                newScore,
-                newEmission
+      async updateUserAfterGame(username, userIndex, pointsGagnes) {
+         try {
+            const response = await fetch("http://localhost:3000/update", {
+               method: "PUT",
+               headers: { "Content-Type": "application/json" },
+               body: JSON.stringify({
+                  username: username,
+                  newScore: pointsGagnes,
+                  newEmission: 0.0000183, // ou autre émission si besoin
+               }),
             });
-            this.usersLocal = this.usersLocal.map(u=>
-               u.username === response.data.user.username
-                  ? response.data.user
-                  : u
-            );
-            // axios jette en erreur si status != 2xx, donc ici on est en 2xx
-            console.log('✅ Score et émission CO2 mis à jour :', response.data.user);
-        } catch (err) {
-            // err.response existe si le serveur a renvoyé un payload (4xx/5xx)
-            if (err.response) {
-            console.error(`❌ Erreur ${err.response.status} :`, err.response.data.message || err.response.data);
+            const data = await response.json();
+            if (response.ok) {
+               console.log("✅ Score mis à jour :", data.user);
+               // Maintenant tu updates localement :
+               this.$emit("update-user", { userId: userIndex, userData: data.user });
             } else {
-            // sinon c’est une erreur réseau / timeout / CORS…
-            console.error('❌ Erreur réseau ou autre :', err.message);
+               console.error("❌ Erreur update:", data.message);
             }
-        }
-        },
-   
-    },
+         } catch (err) {
+            console.error("❌ Erreur réseau:", err.message);
+         }
+      },
+   },
    mounted() {
       this.initBoard();
       this.renderBoard();
