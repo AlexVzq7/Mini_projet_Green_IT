@@ -17,7 +17,7 @@ mongoose
    .catch((err) => console.error("❌ Erreur MongoDB:", err));
 
 app.post("/register", async (req, res) => {
-   const { username, password } = req.body;
+   const { username, password, image } = req.body;
    try {
       if (!username || !password) {
          return res.status(400).json({ message: "Nom d'utilisateur et mot de passe requis." });
@@ -29,7 +29,7 @@ app.post("/register", async (req, res) => {
          return res.status(409).json({ message: "Nom d'utilisateur déjà pris." });
       }
 
-      const newUser = new User({ username, password });
+      const newUser = new User({ username, password , image });
       await newUser.save();
 
       res.status(201).json({
