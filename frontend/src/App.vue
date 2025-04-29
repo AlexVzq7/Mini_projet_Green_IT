@@ -1,15 +1,24 @@
 <template>
-   <div class="main">
-      <UserLoginCard :user-id="1" :user="user1" @update-user="updateUser1" class="component-left" />
-      <GameBoard :users="[user1, user2]" @update-user="handleGameUpdate" />
-      <UserLoginCard
-         :user-id="2"
-         :user="user2"
-         @update-user="updateUser2"
-         class="component-right"
-      />
-   </div>
-   <accueil />
+  <div class="main">
+    <UserLoginCard
+      :user-id="1"
+      :user="user1"
+      @update-user="updateUser1"
+      class="component-left"
+    />
+    <GameBoard
+      :users="[user1, user2]"
+      @update-user="handleGameUpdate"
+      class="GameBoard"
+    />
+    <UserLoginCard
+      :user-id="2"
+      :user="user2"
+      @update-user="updateUser2"
+      class="component-right"
+    />
+  </div>
+  <accueil />
 </template>
 
 <script setup>
@@ -22,22 +31,22 @@ const user1 = ref({ username: "..." });
 const user2 = ref({ username: "..." });
 
 const updateUser1 = (newUser) => {
-   user1.value = newUser;
+  user1.value = newUser;
 };
 
 const updateUser2 = (newUser) => {
-   user2.value = newUser;
+  user2.value = newUser;
 };
 
 const handleGameUpdate = ({ userId, userData }) => {
-   if (userId === 1) {
-      user1.value = userData;
-      localStorage.setItem("user_1", JSON.stringify(userData));
-      console.log(userData);
-   } else if (userId === 2) {
-      user2.value = userData;
-      localStorage.setItem("user_2", JSON.stringify(userData));
-   }
+  if (userId === 1) {
+    user1.value = userData;
+    localStorage.setItem("user_1", JSON.stringify(userData));
+    console.log(userData);
+  } else if (userId === 2) {
+    user2.value = userData;
+    localStorage.setItem("user_2", JSON.stringify(userData));
+  }
 };
 </script>
 
@@ -45,25 +54,44 @@ const handleGameUpdate = ({ userId, userData }) => {
 @import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
 
 * {
-   margin: 0;
-   padding: 0;
-   font-family: "Inter", sans-serif;
+  font-family: "Inter", sans-serif;
 }
 .main {
-   display: flex;
-   justify-content: center;
-   align-items: center;
-   height: 100vh;
-   padding: 20px 40px;
-   gap: 100px; /* Ajoute un espace équilibré entre les 3 composants */
-   box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  height: 100vh;
+  width: 100vw;
+  border: 1px solid black;
+  box-sizing: border-box;
+  position: relative;
 }
 
-.component-left {
-   margin-left: 150px;
+@media (max-width: 480px) {
+  .main {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .component-left {
+    transform: scale(0.5);
+    margin-left: 0;
+  }
+  .component-right {
+    transform: scale(0.5);
+    margin-right: 0;
+  }
 }
 
-.component-right {
-   margin-right: 150px;
+@media (min-width: 1300px) {
+  #main {
+    padding: 0 100px;
+    border: 2px solid black;
+  }
+  .component-left {
+    margin-left: 50px;
+  }
+  .component-right {
+    margin-right: 50px;
+  }
 }
 </style>

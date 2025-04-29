@@ -191,12 +191,13 @@ function formatEmission(val) {
 
 <style scoped>
 .user-login-card {
+  position: relative;
   background: #fafafa;
   padding: 20px;
   border-radius: 15px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
   width: 100%;
-  min-width: 220px;
+  min-width: 230px;
   max-width: 250px;
   display: flex;
   flex-direction: column;
