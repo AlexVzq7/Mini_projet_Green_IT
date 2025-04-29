@@ -12,13 +12,17 @@ Il gère :
 
 ## Installation
 
-Assurer d'avoir MangoDB sur votre PC et les plateformes Node et NPM d'installer
+Assurer d'avoir MongoDB sur votre PC et les plateformes Node et NPM d'installer
 
-1. Dans un terminal de commande rendez-vous dans le backend
-2. Entrer la commande "node server.js"
-3. Puis dans un second terminal rendez-vous dans le frontend
-4. Taper la commande "npm run dev"
-5. Enfin ouvrez-vous sur la page http://localhost:5173/
+1. Cloner le projet avec la commande 'git clone https://github.com/AlexVzq7/Mini_projet_Green_IT.git'
+2. Puis ouvrez MongoDB créez une base de données "green-it" et connectez vous y.
+3. Dans un terminal de commande rendez-vous dans le backend
+4. Entrer la commande "node server.js"
+5. Puis dans un second terminal rendez-vous dans le frontend
+6. Taper la commande "npm run dev"
+7. Enfin ouvrez la page http://localhost:5173/
+
+Ou alors connectez au site en ligne en cliquant sur le [lien](https://frontend-2-sand.vercel.app/)
 
 ## Fonctionnalités
 
@@ -48,3 +52,5 @@ Assurer d'avoir MangoDB sur votre PC et les plateformes Node et NPM d'installer
 -  H'LALI Abdellah
 -  MIR Driss
 -  VAZQUEZ Alexandre
+
+---
