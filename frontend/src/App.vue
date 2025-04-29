@@ -61,7 +61,6 @@ const handleGameUpdate = ({ userId, userData }) => {
   align-items: center;
   height: 100vh;
   width: 100vw;
-  border: 1px solid black;
   box-sizing: border-box;
   position: relative;
 }
@@ -85,7 +84,6 @@ const handleGameUpdate = ({ userId, userData }) => {
 @media (min-width: 1300px) {
   #main {
     padding: 0 100px;
-    border: 2px solid black;
   }
   .component-left {
     margin-left: 50px;
